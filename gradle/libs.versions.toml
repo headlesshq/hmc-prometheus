@@ -1,0 +1,21 @@
+[versions]
+prometheus = "1.9.0"
+hmc-specifics = "3.0.0"
+headlessmc = "3.0.0-RC8"
+picocli = "4.7.7"
+log4j = "2.23.1"
+shadow = "9.6.1"
+
+[libraries]
+prometheus-core = { module = "io.prometheus:prometheus-metrics-core", version.ref = "prometheus" }
+prometheus-instrumentation-jvm = { module = "io.prometheus:prometheus-metrics-instrumentation-jvm", version.ref = "prometheus" }
+prometheus-exporter-httpserver = { module = "io.prometheus:prometheus-metrics-exporter-httpserver", version.ref = "prometheus" }
+hmc-specifics-api = { module = "me.earth.headlessmc:hmc-specifics-api", version.ref = "hmc-specifics" }
+headlessmc-console = { module = "io.github.headlesshq:headlessmc-console", version.ref = "headlessmc" }
+headlessmc-auth = { module = "io.github.headlesshq:headlessmc-auth", version.ref = "headlessmc" }
+picocli = { module = "info.picocli:picocli", version.ref = "picocli" }
+log4j-api = { module = "org.apache.logging.log4j:log4j-api", version.ref = "log4j" }
+log4j-core = { module = "org.apache.logging.log4j:log4j-core", version.ref = "log4j" }
+
+[plugins]
+shadow = { id = "com.gradleup.shadow", version.ref = "shadow" }

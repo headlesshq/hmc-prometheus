@@ -1,6 +1,6 @@
 plugins {
     id 'java'
-    id 'com.gradleup.shadow' version '9.6.1'
+    alias(libs.plugins.shadow)
 }
 
 group = 'io.github.headlesshq'
@@ -37,23 +37,23 @@ configurations {
 dependencies {
     compileOnly sourceSets.stubs.output
     // Provided by the HMC-Specifics mod at runtime, together with picocli.
-    compileOnly "me.earth.headlessmc:hmc-specifics-api:${hmc_specifics_version}"
-    compileOnly "info.picocli:picocli:${picocli_version}"
-    compileOnly "io.github.headlesshq:headlessmc-console:${headlessmc_version}"
+    compileOnly libs.hmc.specifics.api
+    compileOnly libs.picocli
+    compileOnly libs.headlessmc.console
     // Provided by Minecraft, only methods that exist since 2.0-beta9 (Minecraft 1.7.10) are used.
-    compileOnly "org.apache.logging.log4j:log4j-api:${log4j_version}"
-    compileOnly "org.apache.logging.log4j:log4j-core:${log4j_version}"
+    compileOnly libs.log4j.api
+    compileOnly libs.log4j.core
 
-    demoImplementation "me.earth.headlessmc:hmc-specifics-api:${hmc_specifics_version}"
-    demoImplementation "info.picocli:picocli:${picocli_version}"
-    demoImplementation "io.github.headlesshq:headlessmc-console:${headlessmc_version}"
-    demoImplementation "io.github.headlesshq:headlessmc-auth:${headlessmc_version}"
-    demoImplementation "org.apache.logging.log4j:log4j-api:${log4j_version}"
-    demoImplementation "org.apache.logging.log4j:log4j-core:${log4j_version}"
+    demoImplementation libs.hmc.specifics.api
+    demoImplementation libs.picocli
+    demoImplementation libs.headlessmc.console
+    demoImplementation libs.headlessmc.auth
+    demoImplementation libs.log4j.api
+    demoImplementation libs.log4j.core
 
-    shade "io.prometheus:prometheus-metrics-core:${prometheus_version}"
-    shade "io.prometheus:prometheus-metrics-instrumentation-jvm:${prometheus_version}"
-    shade("io.prometheus:prometheus-metrics-exporter-httpserver:${prometheus_version}") {
+    shade libs.prometheus.core
+    shade libs.prometheus.instrumentation.jvm
+    shade(libs.prometheus.exporter.httpserver) {
         // Contains the shaded protobuf (~2 MB) for the protobuf exposition format.
         // It is optional, the text formats are in prometheus-metrics-exposition-textformats.
         exclude group: 'io.prometheus', module: 'prometheus-metrics-exposition-formats'

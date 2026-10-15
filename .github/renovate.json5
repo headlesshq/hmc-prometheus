@@ -1,0 +1,101 @@
+{
+  extends: [
+    ':enableRenovate',
+    ':semanticCommits',
+    'config:best-practices',
+  ],
+  timezone: 'UTC',
+  dependencyDashboard: true,
+  platformCommit: 'enabled',
+  prCreation: 'not-pending',
+  automergeStrategy: 'squash',
+  suppressNotifications: [
+    'prIgnoreNotification',
+  ],
+  rebaseWhen: 'conflicted',
+  enabledManagers: [
+    'gradle',
+    'gradle-wrapper',
+    'github-actions',
+    'docker-compose',
+  ],
+  packageRules: [
+    {
+      // dependency updates affect the released artifacts, so they should trigger a release
+      matchManagers: [
+        'gradle',
+      ],
+      semanticCommitType: 'fix',
+      semanticCommitScope: 'deps',
+    },
+    {
+      matchManagers: [
+        'gradle-wrapper',
+      ],
+      semanticCommitType: 'build',
+      semanticCommitScope: 'deps',
+    },
+    {
+      matchManagers: [
+        'github-actions',
+      ],
+      semanticCommitType: 'ci',
+      semanticCommitScope: 'deps',
+    },
+    {
+      // the Prometheus, Loki and Grafana images of the example are not part of the released mod
+      matchManagers: [
+        'docker-compose',
+      ],
+      semanticCommitType: 'chore',
+      semanticCommitScope: 'deps',
+    },
+    {
+      // the libraries of the Prometheus Java client share a version
+      matchPackageNames: [
+        'io.prometheus:**',
+      ],
+      groupName: 'Prometheus Java client',
+    },
+    {
+      // hmc-specifics-api is built from the hmc-specifics submodule, it is not published
+      matchPackageNames: [
+        'me.earth.headlessmc:hmc-specifics-api',
+      ],
+      enabled: false,
+    },
+    {
+      // provided at runtime by hmc-specifics and Minecraft, the versions follow hmc-specifics
+      matchPackageNames: [
+        'io.github.headlesshq:headlessmc-**',
+        'info.picocli:picocli',
+        'org.apache.logging.log4j:**',
+      ],
+      enabled: false,
+    },
+    {
+      matchUpdateTypes: [
+        'major',
+      ],
+      addLabels: [
+        'dependency/major',
+      ],
+    },
+    {
+      matchUpdateTypes: [
+        'minor',
+      ],
+      addLabels: [
+        'dependency/minor',
+      ],
+    },
+    {
+      matchUpdateTypes: [
+        'patch',
+      ],
+      addLabels: [
+        'dependency/patch',
+      ],
+    },
+  ],
+}
