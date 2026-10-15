@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "id": "hmc_prometheus",
+  "version": "${version}",
+  "name": "HMC-Prometheus",
+  "description": "A Prometheus exporter for the Minecraft client, built on the metrics of HMC-Specifics.",
+  "license": "MIT",
+  "icon": "hmc_prometheus.png",
+  "contact": {
+    "homepage": "https://github.com/headlesshq/hmc-prometheus",
+    "sources": "https://github.com/headlesshq/hmc-prometheus"
+  },
+  "environment": "client",
+  "entrypoints": {
+    "client": [
+      "io.github.headlesshq.hmcprometheus.loader.FabricMod"
+    ]
+  },
+  "depends": {
+    "headlessmc": "*",
+    "java": ">=8"
+  }
+}

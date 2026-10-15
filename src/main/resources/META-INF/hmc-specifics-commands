@@ -1,0 +1,2 @@
+# The commands of HMC-Prometheus, see me.earth.headlessmc.mc.commands.CommandRegistry in HMC-Specifics.
+io.github.headlesshq.hmcprometheus.command.PrometheusCommand

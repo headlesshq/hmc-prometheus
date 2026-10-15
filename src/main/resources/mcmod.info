@@ -1,0 +1,11 @@
+[
+  {
+    "modid": "hmc_prometheus",
+    "name": "HMC-Prometheus",
+    "description": "A Prometheus exporter for the Minecraft client, built on the metrics of HMC-Specifics.",
+    "version": "${version}",
+    "url": "https://github.com/headlesshq/hmc-prometheus",
+    "logoFile": "/hmc_prometheus.png",
+    "dependencies": []
+  }
+]

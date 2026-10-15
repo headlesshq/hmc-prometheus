@@ -1,0 +1,43 @@
+# Gradle
+.gradle/
+build/
+out/
+classes/
+
+# Eclipse
+.project
+.classpath
+.settings/
+bin/
+*.launch
+
+# IntelliJ
+.idea/
+*.ipr
+*.iml
+*.iws
+
+# Visual Studio Code
+.vscode/
+
+# OSX
+.DS_Store
+
+# Java
+hs_err_*.log
+replay_*.log
+*.hprof
+*.jfr
+*.log
+/libs/
+/logs/
+
+# Minecraft / HeadlessMc
+run/
+HeadlessMC
+HeadlessMc
+headlessmc-launcher-*.jar
+
+# Local environment
+.env
+.claude

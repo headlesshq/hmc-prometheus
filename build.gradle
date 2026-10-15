@@ -1,0 +1,144 @@
+plugins {
+    id 'java'
+    id 'com.gradleup.shadow' version '9.6.1'
+}
+
+group = 'io.github.headlesshq'
+version = "${project_version}"
+
+repositories {
+    mavenCentral()
+}
+
+// One jar for every modloader and Minecraft version, so everything is compiled for Java 8.
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+    options.release = 8
+    options.compilerArgs.add('-Xlint:-options')
+}
+
+// The stubs replace the classes of the modloaders, they are only compiled against and not packaged.
+// The demo simulates clients without Minecraft, see the runDemo task.
+sourceSets {
+    stubs
+    demo {
+        compileClasspath += sourceSets.main.output
+        runtimeClasspath += sourceSets.main.output
+    }
+}
+
+configurations {
+    // Bundled into the jar and relocated, Minecraft does not ship Prometheus.
+    shade
+    implementation.extendsFrom shade
+    demoImplementation.extendsFrom implementation
+}
+
+dependencies {
+    compileOnly sourceSets.stubs.output
+    // Provided by the HMC-Specifics mod at runtime, together with picocli.
+    compileOnly 'me.earth.headlessmc:hmc-specifics-api:2.5.0'
+    compileOnly "info.picocli:picocli:${picocli_version}"
+    compileOnly "io.github.headlesshq:headlessmc-console:${headlessmc_version}"
+    // Provided by Minecraft, only methods that exist since 2.0-beta9 (Minecraft 1.7.10) are used.
+    compileOnly "org.apache.logging.log4j:log4j-api:${log4j_version}"
+    compileOnly "org.apache.logging.log4j:log4j-core:${log4j_version}"
+
+    demoImplementation 'me.earth.headlessmc:hmc-specifics-api:2.5.0'
+    demoImplementation "info.picocli:picocli:${picocli_version}"
+    demoImplementation "io.github.headlesshq:headlessmc-console:${headlessmc_version}"
+    demoImplementation "io.github.headlesshq:headlessmc-auth:${headlessmc_version}"
+    demoImplementation "org.apache.logging.log4j:log4j-api:${log4j_version}"
+    demoImplementation "org.apache.logging.log4j:log4j-core:${log4j_version}"
+
+    shade "io.prometheus:prometheus-metrics-core:${prometheus_version}"
+    shade "io.prometheus:prometheus-metrics-instrumentation-jvm:${prometheus_version}"
+    shade("io.prometheus:prometheus-metrics-exporter-httpserver:${prometheus_version}") {
+        // Contains the shaded protobuf (~2 MB) for the protobuf exposition format.
+        // It is optional, the text formats are in prometheus-metrics-exposition-textformats.
+        exclude group: 'io.prometheus', module: 'prometheus-metrics-exposition-formats'
+    }
+}
+
+processResources {
+    def props = [version: project.version]
+    inputs.properties props
+    filesMatching(['fabric.mod.json', 'mcmod.info', 'META-INF/mods.toml', 'META-INF/neoforge.mods.toml', 'hmc_prometheus.version']) {
+        expand props
+    }
+
+    from('docs/logo.png') {
+        rename { 'hmc_prometheus.png' }
+    }
+}
+
+shadowJar {
+    configurations = [project.configurations.shade]
+    archiveClassifier = ''
+    // Other mods might bundle a different version of Prometheus.
+    // Only io.prometheus.metrics is relocated, so that strings like the protobuf type io.prometheus.client.MetricFamily stay intact.
+    relocate 'io.prometheus.metrics', 'io.github.headlesshq.hmcprometheus.shadow.io.prometheus.metrics'
+    exclude 'META-INF/maven/**'
+    exclude 'META-INF/versions/**'
+    exclude 'module-info.class'
+    mergeServiceFiles()
+}
+
+jar {
+    archiveClassifier = 'dev'
+}
+
+tasks.withType(Jar).configureEach {
+    manifest.attributes('Implementation-Title': project.name, 'Implementation-Version': project.version)
+}
+
+tasks.named('assemble') { dependsOn(shadowJar) }
+
+// Starts simulated clients, each in its own JVM and working directory like separate Minecraft instances.
+// They register themselves for Prometheus file based service discovery, see example/README.md.
+tasks.register('runDemo') {
+    group = 'application'
+    description = 'Runs simulated Minecraft clients with HMC-Prometheus, without Minecraft.'
+    dependsOn 'demoClasses'
+    def classpath = sourceSets.demo.runtimeClasspath
+    def demoDir = layout.buildDirectory.dir('demo')
+    def clients = ['Alex': 'server', 'Steve': 'singleplayer', 'Notch': 'menu', 'Herobrine': 'laggy']
+    // Notch simulates HeadlessMc's headless mode, it does not render, so there are no screenshots
+    def headless = ['Notch']
+    // e.g. -PlokiUrl=http://127.0.0.1:3100 to push the logs of the simulated clients
+    def lokiUrl = providers.gradleProperty('lokiUrl').orNull
+    // e.g. -PdiscoveryDir=/some/dir, defaults to the discoveryDir of the config
+    def discoveryDir = providers.gradleProperty('discoveryDir').orNull
+    doLast {
+        def processes = clients.collect { name, scenario ->
+            def dir = demoDir.get().dir(name).asFile
+            dir.mkdirs()
+            def command = [new File(System.getProperty('java.home'), 'bin/java').absolutePath]
+            if (discoveryDir != null) {
+                command << "-Dhmc.prometheus.discoveryDir=${new File(discoveryDir).absolutePath}".toString()
+            }
+
+            if (lokiUrl != null) {
+                command << "-Dhmc.prometheus.lokiUrl=${lokiUrl}".toString()
+            }
+
+            if (name in headless) {
+                command << '-Dhmc.screenshots.enabled=false'
+            }
+
+            command += ['-cp', classpath.asPath, 'io.github.headlesshq.hmcprometheus.demo.DemoClient', name, scenario]
+            new ProcessBuilder(command)
+                .directory(dir)
+                .redirectErrorStream(true)
+                .redirectOutput(new File(dir, 'output.log'))
+                .start()
+        }
+
+        println "Started ${clients.keySet()}, logs in ${demoDir.get().asFile}. Press Ctrl+C to stop."
+        try {
+            processes.each { it.waitFor() }
+        } finally {
+            processes.each { it.destroy() }
+        }
+    }
+}

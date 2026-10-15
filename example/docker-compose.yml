@@ -1,0 +1,57 @@
+# Prometheus, Loki and Grafana for hmc-prometheus, see README.md.
+# All use the host network, so Prometheus can scrape clients that only listen on 127.0.0.1.
+# Host networking requires Linux (or Docker Desktop with host networking enabled), see README.md for alternatives.
+services:
+  prometheus:
+    image: prom/prometheus:v3.15.0
+    network_mode: host
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+      - --storage.tsdb.retention.time=30d
+      - --web.listen-address=127.0.0.1:9090
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      # Every client writes a file here, so Prometheus finds it no matter which port it got
+      - ${HMC_PROMETHEUS_TARGETS:-~/.hmc-prometheus/targets}:/targets:ro
+      - prometheus-data:/prometheus
+    restart: unless-stopped
+
+  loki:
+    image: grafana/loki:3.7.8
+    network_mode: host
+    command:
+      - -config.file=/etc/loki/loki.yml
+    volumes:
+      - ./loki/loki.yml:/etc/loki/loki.yml:ro
+      - loki-data:/loki
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:13.1.8
+    network_mode: host
+    environment:
+      GF_SERVER_HTTP_ADDR: 127.0.0.1
+      GF_SERVER_HTTP_PORT: "3000"
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-admin}
+      # Anyone who can reach Grafana can view the dashboards without logging in
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Viewer
+      GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH: /etc/grafana/dashboards/minecraft-clients.json
+      # Grafana sandboxes iframes in text panels, which blocks the scripts of the HMC-Prometheus console.
+      # This also allows scripts in text panels, only users who can edit dashboards (admin) can add them.
+      GF_PANELS_DISABLE_SANITIZE_HTML: "true"
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./grafana/dashboards:/etc/grafana/dashboards:ro
+      - grafana-data:/var/lib/grafana
+    depends_on:
+      - prometheus
+      - loki
+    restart: unless-stopped
+
+volumes:
+  prometheus-data:
+  loki-data:
+  grafana-data:

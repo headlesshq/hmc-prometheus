@@ -1,0 +1,9 @@
+rootProject.name = 'hmc-prometheus'
+
+// HMC-Specifics is a git submodule, run 'git submodule update --init' after cloning.
+// Its API is built from source, because HMC-Prometheus uses the metrics API that is not released yet.
+includeBuild('hmc-specifics/hmc-specifics-api') {
+    dependencySubstitution {
+        substitute module('me.earth.headlessmc:hmc-specifics-api') using project(':')
+    }
+}

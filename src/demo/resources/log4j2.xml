@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Like Minecraft's log4j2.xml: the console and logs/latest.log -->
+<Configuration status="WARN">
+    <Appenders>
+        <Console name="SysOut" target="SYSTEM_OUT">
+            <PatternLayout pattern="[%d{HH:mm:ss}] [%t/%level]: %msg{nolookups}%n"/>
+        </Console>
+        <File name="LatestLog" fileName="logs/latest.log" append="false">
+            <PatternLayout pattern="[%d{HH:mm:ss}] [%t/%level]: %msg{nolookups}%n"/>
+        </File>
+    </Appenders>
+    <Loggers>
+        <Root level="info">
+            <AppenderRef ref="SysOut"/>
+            <AppenderRef ref="LatestLog"/>
+        </Root>
+    </Loggers>
+</Configuration>

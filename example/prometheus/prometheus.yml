@@ -1,0 +1,23 @@
+global:
+  scrape_interval: 5s
+  evaluation_interval: 5s
+
+scrape_configs:
+  - job_name: minecraft
+    # The clients set the client label on all of their metrics themselves.
+    # The discovery files set it too, so that a client that is down shows up as up{client="..."} == 0.
+    honor_labels: true
+    file_sd_configs:
+      - files:
+          - /targets/*.json
+        refresh_interval: 10s
+
+  # Without file based service discovery, e.g. for clients on other machines, list them explicitly:
+  # - job_name: minecraft-static
+  #   honor_labels: true
+  #   static_configs:
+  #     - targets: ['192.168.1.20:9400', '192.168.1.20:9401']
+
+  - job_name: prometheus
+    static_configs:
+      - targets: ['127.0.0.1:9090']

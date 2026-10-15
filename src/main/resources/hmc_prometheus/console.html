@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HMC-Prometheus console</title>
+<style>
+  :root { --bg: #181b1f; --border: #2c3235; --text: #ccccdc; --muted: #8e8e9e; --accent: #6e9fff; --ok: #73bf69; --error: #ff7383; }
+  @media (prefers-color-scheme: light) {
+    :root { --bg: #ffffff; --border: #d8d9da; --text: #24292e; --muted: #6e6e7e; --accent: #1f62e0; --ok: #1a7f37; --error: #d10e5c; }
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; }
+  body { background: var(--bg); color: var(--text); font: 13px/1.45 ui-monospace, "JetBrains Mono", Menlo, Consolas, monospace;
+         display: flex; flex-direction: column; }
+  form { display: flex; gap: 8px; padding: 4px 8px; border: 1px solid var(--border); border-radius: 2px; }
+  form:focus-within { border-color: var(--accent); }
+  label { color: var(--accent); align-self: center; }
+  input { flex: 1; min-width: 0; background: transparent; color: var(--text); border: 0; outline: none; font: inherit; }
+  #status { padding: 3px 8px 0; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  #status.ok { color: var(--ok); }
+  #status.err { color: var(--error); }
+  #output { flex: 1; overflow-y: auto; padding: 4px 8px; white-space: pre-wrap; word-break: break-word; }
+  #output:empty { display: none; }
+</style>
+</head>
+<body>
+<form id="form" autocomplete="off">
+  <label for="input">&gt;</label>
+  <input id="input" spellcheck="false" aria-label="Command">
+</form>
+<div id="status" role="status"></div>
+<div id="output" role="log"></div>
+<script>
+const CLIENT = "{{client}}";
+const ENABLED = {{enabled}};
+const input = document.getElementById("input");
+const status = document.getElementById("status");
+const output = document.getElementById("output");
+const HISTORY_KEY = "hmc-console-history";
+let history = [];
+try { history = JSON.parse(localStorage.getItem(HISTORY_KEY) || "[]"); } catch (e) { history = []; }
+let historyIndex = history.length;
+
+// only needed if Loki is disabled and the output is shown here: ANSI escape codes to HTML
+const COLORS = ["#000000", "#cd3131", "#0dbc79", "#e5e510", "#2472c8", "#bc3fbc", "#11a8cd", "#e5e5e5",
+                "#666666", "#f14c4c", "#23d18b", "#f5f543", "#3b8eea", "#d670d6", "#29b8db", "#ffffff"];
+function color256(n) {
+  if (n < 16) return COLORS[n];
+  if (n >= 232) { const v = 8 + (n - 232) * 10; return `rgb(${v},${v},${v})`; }
+  n -= 16;
+  const c = v => v === 0 ? 0 : 55 + v * 40;
+  return `rgb(${c(Math.floor(n / 36))},${c(Math.floor(n / 6) % 6)},${c(n % 6)})`;
+}
+function escapeHtml(s) { return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
+function ansiToHtml(text) {
+  let state = {};
+  let html = "";
+  const parts = text.split(/\x1b\[([0-9;]*)m/);
+  for (let i = 0; i < parts.length; i++) {
+    if (i % 2 === 1) {
+      const codes = parts[i] === "" ? [0] : parts[i].split(";").map(Number);
+      for (let j = 0; j < codes.length; j++) {
+        const c = codes[j];
+        if (c === 0) state = {};
+        else if (c === 1) state.bold = true;
+        else if (c === 22) state.bold = false;
+        else if (c >= 30 && c <= 37) state.fg = COLORS[c - 30];
+        else if (c >= 90 && c <= 97) state.fg = COLORS[c - 82];
+        else if (c === 39) delete state.fg;
+        else if (c === 38 && codes[j + 1] === 5) { state.fg = color256(codes[j + 2]); j += 2; }
+        else if (c === 38 && codes[j + 1] === 2) { state.fg = `rgb(${codes[j + 2]},${codes[j + 3]},${codes[j + 4]})`; j += 4; }
+      }
+      continue;
+    }
+    if (!parts[i]) continue;
+    const style = (state.fg ? `color:${state.fg};` : "") + (state.bold ? "font-weight:bold;" : "");
+    html += style ? `<span style="${style}">${escapeHtml(parts[i])}</span>` : escapeHtml(parts[i]);
+  }
+  return html;
+}
+function stripAnsi(text) { return text.replace(/\x1b\[[0-9;]*m/g, ""); }
+
+function setStatus(text, cls) {
+  status.textContent = text;
+  status.className = cls || "";
+  status.title = text;
+}
+
+async function run(line) {
+  setStatus("> " + line + " …");
+  try {
+    const response = await fetch("command", {
+      method: "POST",
+      headers: {"X-HMC-Console": "1", "Content-Type": "text/plain; charset=utf-8"},
+      body: line
+    });
+    const text = await response.text();
+    if (!response.ok) {
+      setStatus(stripAnsi(text).trim() || ("HTTP " + response.status), "err");
+      return;
+    }
+
+    const lines = text ? text.split("\n").length : 0;
+    if (response.headers.get("X-HMC-Loki") === "true") {
+      output.innerHTML = "";
+      const first = stripAnsi(text.split("\n")[0] || "").trim();
+      setStatus(`✓ ${line}: ` + (lines === 0 ? "no output" : lines === 1 ? first : `${lines} lines in the log`), "ok");
+    } else {
+      setStatus(`✓ ${line} (Loki is disabled, so the output is shown here)`, "ok");
+      output.innerHTML = ansiToHtml(text);
+    }
+  } catch (e) {
+    setStatus("Failed to reach the client: " + e, "err");
+  }
+}
+
+document.getElementById("form").addEventListener("submit", e => {
+  e.preventDefault();
+  const line = input.value.trim();
+  input.value = "";
+  if (!line) return;
+  if (history[history.length - 1] !== line) history.push(line);
+  history = history.slice(-200);
+  historyIndex = history.length;
+  try { localStorage.setItem(HISTORY_KEY, JSON.stringify(history)); } catch (err) { /* private mode */ }
+  run(line);
+});
+
+input.addEventListener("keydown", e => {
+  if (e.key === "ArrowUp" && historyIndex > 0) {
+    input.value = history[--historyIndex]; e.preventDefault();
+  } else if (e.key === "ArrowDown") {
+    historyIndex = Math.min(history.length, historyIndex + 1);
+    input.value = history[historyIndex] || ""; e.preventDefault();
+  }
+});
+
+if (!ENABLED) {
+  setStatus("The console is disabled. Enable it in the game with: prometheus set console true", "err");
+  input.disabled = true;
+}
+</script>
+</body>
+</html>

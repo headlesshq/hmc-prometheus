@@ -1,0 +1,18 @@
+modLoader = "javafml"
+loaderVersion = "[1,)"
+license = "MIT"
+issueTrackerURL = "https://github.com/headlesshq/hmc-prometheus/issues"
+
+[[mods]]
+modId = "hmc_prometheus"
+version = "${version}"
+displayName = "HMC-Prometheus"
+logoFile = "hmc_prometheus.png"
+description = "A Prometheus exporter for the Minecraft client, built on the metrics of HMC-Specifics."
+
+[[dependencies.hmc_prometheus]]
+modId = "headlessmc"
+type = "required"
+versionRange = "[0,)"
+ordering = "AFTER"
+side = "CLIENT"
