@@ -1,0 +1,341 @@
+{
+  "name": "HMC-Prometheus Test",
+  "timeout": 120,
+  "steps": [
+    {
+      "type": "CONTAINS",
+      "message": "HMC-Prometheus serving metrics of client",
+      "timeout": 600,
+      "or": [
+        {
+          "type": "CONTAINS",
+          "message": "Failed to start HMC-Prometheus",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        },
+        {
+          "type": "CONTAINS",
+          "message": "Failed to load the HMC-Prometheus config",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        },
+        {
+          "type": "REGEX",
+          "message": ".*Failed to (load|register) command.*",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        },
+        {
+          "type": "CONTAINS",
+          "message": "Couldn't find command for",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        },
+        {
+          "type": "CONTAINS",
+          "message": "An error occurred: ",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "SEND",
+      "message": "prometheus"
+    },
+    {
+      "type": "REGEX",
+      "message": ".*Status:\\s+running.*",
+      "or": [
+        {
+          "type": "CONTAINS",
+          "message": "Failed to start HMC-Prometheus",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        },
+        {
+          "type": "CONTAINS",
+          "message": "Failed to load the HMC-Prometheus config",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        },
+        {
+          "type": "REGEX",
+          "message": ".*Failed to (load|register) command.*",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        },
+        {
+          "type": "CONTAINS",
+          "message": "Couldn't find command for",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        },
+        {
+          "type": "CONTAINS",
+          "message": "An error occurred: ",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "REGEX",
+      "message": ".*Metrics:\\s+http://.+/metrics.*",
+      "or": [
+        {
+          "type": "CONTAINS",
+          "message": "Failed to start HMC-Prometheus",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        },
+        {
+          "type": "CONTAINS",
+          "message": "Failed to load the HMC-Prometheus config",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        },
+        {
+          "type": "REGEX",
+          "message": ".*Failed to (load|register) command.*",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        },
+        {
+          "type": "CONTAINS",
+          "message": "Couldn't find command for",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        },
+        {
+          "type": "CONTAINS",
+          "message": "An error occurred: ",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "SEND",
+      "message": "prometheus stop"
+    },
+    {
+      "type": "ENDS_WITH",
+      "message": "Stopped the exporter.",
+      "or": [
+        {
+          "type": "CONTAINS",
+          "message": "Failed to start HMC-Prometheus",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        },
+        {
+          "type": "CONTAINS",
+          "message": "Failed to load the HMC-Prometheus config",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        },
+        {
+          "type": "REGEX",
+          "message": ".*Failed to (load|register) command.*",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        },
+        {
+          "type": "CONTAINS",
+          "message": "Couldn't find command for",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        },
+        {
+          "type": "CONTAINS",
+          "message": "An error occurred: ",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "SEND",
+      "message": "prometheus"
+    },
+    {
+      "type": "REGEX",
+      "message": ".*Status:\\s+stopped.*",
+      "or": [
+        {
+          "type": "CONTAINS",
+          "message": "Failed to start HMC-Prometheus",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        },
+        {
+          "type": "CONTAINS",
+          "message": "Failed to load the HMC-Prometheus config",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        },
+        {
+          "type": "REGEX",
+          "message": ".*Failed to (load|register) command.*",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        },
+        {
+          "type": "CONTAINS",
+          "message": "Couldn't find command for",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        },
+        {
+          "type": "CONTAINS",
+          "message": "An error occurred: ",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "SEND",
+      "message": "prometheus start"
+    },
+    {
+      "type": "CONTAINS",
+      "message": "Serving metrics of client",
+      "or": [
+        {
+          "type": "CONTAINS",
+          "message": "Failed to start HMC-Prometheus",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        },
+        {
+          "type": "CONTAINS",
+          "message": "Failed to load the HMC-Prometheus config",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        },
+        {
+          "type": "REGEX",
+          "message": ".*Failed to (load|register) command.*",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        },
+        {
+          "type": "CONTAINS",
+          "message": "Couldn't find command for",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        },
+        {
+          "type": "CONTAINS",
+          "message": "An error occurred: ",
+          "then": [
+            {
+              "type": "FAIL"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "SEND",
+      "message": "quit"
+    },
+    {
+      "type": "ENDS_WITH",
+      "message": "Quitting Minecraft...",
+      "timeout": 60
+    },
+    {
+      "type": "SUCCESS"
+    }
+  ]
+}

@@ -8,6 +8,19 @@ version = "${project_version}"
 
 repositories {
     mavenCentral()
+    // hmc-specifics-api published from the submodule, see settings.gradle
+    def hmcSpecificsApiRepo = providers.gradleProperty('hmcSpecificsApiRepo').orNull
+    if (hmcSpecificsApiRepo != null) {
+        exclusiveContent {
+            forRepository {
+                maven {
+                    name = 'HmcSpecificsApi'
+                    url = file(hmcSpecificsApiRepo)
+                }
+            }
+            filter { includeModule('me.earth.headlessmc', 'hmc-specifics-api') }
+        }
+    }
 }
 
 // One jar for every modloader and Minecraft version, so everything is compiled for Java 8.

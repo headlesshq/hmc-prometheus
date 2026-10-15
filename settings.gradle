@@ -2,8 +2,12 @@ rootProject.name = 'hmc-prometheus'
 
 // HMC-Specifics is a git submodule, run 'git submodule update --init' after cloning.
 // Its API is built from source, because HMC-Prometheus uses the metrics API that is not released yet.
-includeBuild('hmc-specifics/hmc-specifics-api') {
-    dependencySubstitution {
-        substitute module('me.earth.headlessmc:hmc-specifics-api') using project(':')
+// With -PhmcSpecificsApiRepo=<dir> the API is resolved from a maven repository instead,
+// CI uses this to cache the API per commit of the submodule, see .github/workflows/lifecycle.yml.
+if (providers.gradleProperty('hmcSpecificsApiRepo').orNull == null) {
+    includeBuild('hmc-specifics/hmc-specifics-api') {
+        dependencySubstitution {
+            substitute module('me.earth.headlessmc:hmc-specifics-api') using project(':')
+        }
     }
 }
