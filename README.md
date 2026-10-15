@@ -3,6 +3,15 @@
 <p align="center"><img src="docs/logo.png" alt="logo" style="width:250px;"></p>
 <p align="center"><a href="https://github.com/headlesshq/headlessmc">HeadlessMc</a> | <a href="https://github.com/headlesshq/hmc-specifics">hmc-specifics</a> | <a href="https://github.com/headlesshq/hmc-optimizations">hmc-optimizations</a></p>
 
+<div align="center">
+
+[![CodeFactor](https://www.codefactor.io/repository/github/headlesshq/hmc-prometheus/badge/main)](https://www.codefactor.io/repository/github/headlesshq/hmc-prometheus/overview/main)
+[![GitHub All Releases](https://img.shields.io/github/downloads/headlesshq/hmc-prometheus/total.svg)](https://github.com/headlesshq/hmc-prometheus/releases)
+![GitHub](https://img.shields.io/github/license/headlesshq/hmc-prometheus)
+![Github last-commit](https://img.shields.io/github/last-commit/headlesshq/hmc-prometheus)
+
+</div>
+
 A [Prometheus](https://prometheus.io) exporter for the Minecraft client, powered
 by [hmc-specifics](https://github.com/headlesshq/hmc-specifics)
 and [HeadlessMc](https://github.com/headlesshq/headlessmc).
