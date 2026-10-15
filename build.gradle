@@ -37,14 +37,14 @@ configurations {
 dependencies {
     compileOnly sourceSets.stubs.output
     // Provided by the HMC-Specifics mod at runtime, together with picocli.
-    compileOnly 'me.earth.headlessmc:hmc-specifics-api:2.5.0'
+    compileOnly "me.earth.headlessmc:hmc-specifics-api:${hmc_specifics_version}"
     compileOnly "info.picocli:picocli:${picocli_version}"
     compileOnly "io.github.headlesshq:headlessmc-console:${headlessmc_version}"
     // Provided by Minecraft, only methods that exist since 2.0-beta9 (Minecraft 1.7.10) are used.
     compileOnly "org.apache.logging.log4j:log4j-api:${log4j_version}"
     compileOnly "org.apache.logging.log4j:log4j-core:${log4j_version}"
 
-    demoImplementation 'me.earth.headlessmc:hmc-specifics-api:2.5.0'
+    demoImplementation "me.earth.headlessmc:hmc-specifics-api:${hmc_specifics_version}"
     demoImplementation "info.picocli:picocli:${picocli_version}"
     demoImplementation "io.github.headlesshq:headlessmc-console:${headlessmc_version}"
     demoImplementation "io.github.headlesshq:headlessmc-auth:${headlessmc_version}"
@@ -65,10 +65,6 @@ processResources {
     inputs.properties props
     filesMatching(['fabric.mod.json', 'mcmod.info', 'META-INF/mods.toml', 'META-INF/neoforge.mods.toml', 'hmc_prometheus.version']) {
         expand props
-    }
-
-    from('docs/logo.png') {
-        rename { 'hmc_prometheus.png' }
     }
 }
 

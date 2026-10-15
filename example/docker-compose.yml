@@ -42,6 +42,8 @@ services:
       # Grafana sandboxes iframes in text panels, which blocks the scripts of the HMC-Prometheus console.
       # This also allows scripts in text panels, only users who can edit dashboards (admin) can add them.
       GF_PANELS_DISABLE_SANITIZE_HTML: "true"
+      # The output of console commands appears in the log panel on the next refresh, allow refreshing every second
+      GF_DASHBOARDS_MIN_REFRESH_INTERVAL: 1s
     volumes:
       - ./grafana/provisioning:/etc/grafana/provisioning:ro
       - ./grafana/dashboards:/etc/grafana/dashboards:ro

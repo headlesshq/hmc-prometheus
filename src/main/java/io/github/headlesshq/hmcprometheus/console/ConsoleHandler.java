@@ -117,6 +117,11 @@ public final class ConsoleHandler {
             timedOut = "\n" + e.getCause();
         }
 
+        if (pusher != null) {
+            // the command has been executed, also on the main thread, so its output and what it logged are queued
+            pusher.flush();
+        }
+
         exchange.getResponseHeaders().set(LOKI_HEADER, String.valueOf(pusher != null));
         send(exchange, 200, "text/plain; charset=utf-8", output.getOutput() + timedOut);
     }

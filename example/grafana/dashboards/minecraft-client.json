@@ -10,13 +10,15 @@
   "graphTooltip": 1,
   "schemaVersion": 41,
   "version": 1,
-  "refresh": "10s",
+  "refresh": "5s",
   "time": {
     "from": "now-1h",
     "to": "now"
   },
   "timepicker": {
     "refresh_intervals": [
+      "1s",
+      "2s",
       "5s",
       "10s",
       "30s",

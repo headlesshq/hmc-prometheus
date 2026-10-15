@@ -13,6 +13,6 @@ description = "A Prometheus exporter for the Minecraft client, built on the metr
 [[dependencies.hmc_prometheus]]
 modId = "headlessmc"
 type = "required"
-versionRange = "[0,)"
+versionRange = "[3.0.0,)"
 ordering = "AFTER"
 side = "CLIENT"

@@ -13,6 +13,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Level;
@@ -31,6 +32,7 @@ public final class LokiPusher {
     private static final long MAX_BACKOFF_MS = 30_000L;
 
     private final BlockingQueue<Entry> queue = new ArrayBlockingQueue<>(CAPACITY);
+    private final Semaphore flushRequests = new Semaphore(0);
     private final AtomicLong sent = new AtomicLong();
     private final AtomicLong dropped = new AtomicLong();
     private final AtomicLong failedPushes = new AtomicLong();
@@ -69,6 +71,14 @@ public final class LokiPusher {
                 dropped.incrementAndGet();
             }
         }
+    }
+
+    /**
+     * Pushes the queued lines now, instead of waiting up to a second for more lines.
+     * E.g. after a command from the web console has been executed, so that its output shows up quickly.
+     */
+    public void flush() {
+        flushRequests.release();
     }
 
     /**
@@ -127,9 +137,10 @@ public final class LokiPusher {
                     }
 
                     batch.add(first);
-                    // collect what else arrives within a second, so that we push less often
+                    // collect what else arrives within a second, so that we push less often, unless a flush is requested
                     if (running) {
-                        Thread.sleep(1_000L);
+                        flushRequests.tryAcquire(1, TimeUnit.SECONDS);
+                        flushRequests.drainPermits();
                     }
 
                     queue.drainTo(batch, BATCH_SIZE - 1);
