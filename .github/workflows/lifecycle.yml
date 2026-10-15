@@ -46,7 +46,7 @@ jobs:
     steps:
       # the submodule is only checked out if hmc-specifics-api is not cached
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
-      - uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6
+      - uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6
         with:
           java-version: 25
           distribution: temurin
@@ -136,7 +136,7 @@ jobs:
           ls run/mods
 
       - name: Setup Java temurin-${{ matrix.java }}
-        uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6
+        uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6
         with:
           java-version: ${{ matrix.java }}
           distribution: temurin
