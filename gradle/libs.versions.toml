@@ -1,5 +1,5 @@
 [versions]
-prometheus = "1.9.0"
+prometheus = "1.10.0"
 hmc-specifics = "3.0.0"
 headlessmc = "3.0.0-RC8"
 picocli = "4.7.7"
