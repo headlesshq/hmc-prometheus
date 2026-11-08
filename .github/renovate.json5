@@ -18,6 +18,7 @@
     'gradle-wrapper',
     'github-actions',
     'docker-compose',
+    'devcontainer',
   ],
   packageRules: [
     {
