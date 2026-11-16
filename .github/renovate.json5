@@ -5,7 +5,9 @@
     'config:best-practices',
   ],
   timezone: 'UTC',
-  dependencyDashboard: true,
+  dependencyDashboard: {
+    enabled: true,
+  },
   platformCommit: 'enabled',
   prCreation: 'not-pending',
   automergeStrategy: 'squash',
@@ -21,13 +23,11 @@
     'devcontainer',
     'nix',
   ],
-  // the nix manager is in beta and disabled by default
   nix: {
     enabled: true,
   },
   packageRules: [
     {
-      // dependency updates affect the released artifacts, so they should trigger a release
       matchManagers: [
         'gradle',
       ],
@@ -42,7 +42,6 @@
       semanticCommitScope: 'deps',
     },
     {
-      // the flake only provides the dev shell, so its inputs are updated together once a month
       matchManagers: [
         'nix',
       ],
@@ -62,7 +61,6 @@
       semanticCommitScope: 'deps',
     },
     {
-      // the Prometheus, Loki and Grafana images of the example are not part of the released mod
       matchManagers: [
         'docker-compose',
       ],
@@ -70,21 +68,18 @@
       semanticCommitScope: 'deps',
     },
     {
-      // the libraries of the Prometheus Java client share a version
       matchPackageNames: [
         'io.prometheus:**',
       ],
       groupName: 'Prometheus Java client',
     },
     {
-      // hmc-specifics-api is built from the hmc-specifics submodule, it is not published
       matchPackageNames: [
         'me.earth.headlessmc:hmc-specifics-api',
       ],
       enabled: false,
     },
     {
-      // provided at runtime by hmc-specifics and Minecraft, the versions follow hmc-specifics
       matchPackageNames: [
         'io.github.headlesshq:headlessmc-**',
         'info.picocli:picocli',
