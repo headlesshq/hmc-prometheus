@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.1.1](https://github.com/headlesshq/hmc-prometheus/compare/0.1.0...0.1.1) (2026-11-23)
+
+
+### Bug Fixes
+
+* **deps:** update headlessmc to 3.0.0-RC9 ([#21](https://github.com/headlesshq/hmc-prometheus/issues/21)) ([5ad61ce](https://github.com/headlesshq/hmc-prometheus/commit/5ad61ce72aeccae310006798651aa7436e9dac6c))
+* **deps:** update prometheus java client to v1.10.0 ([#6](https://github.com/headlesshq/hmc-prometheus/issues/6)) ([44c1ac0](https://github.com/headlesshq/hmc-prometheus/commit/44c1ac0f9cdf68c2e8911ead2a9e1191d1692098))
+
 ## 0.1.0 (2026-10-15)
 
 
